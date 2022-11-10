@@ -2,6 +2,7 @@ package ch1
 
 import kotlinx.coroutines.*
 import kotlin.concurrent.thread
+import kotlin.properties.Delegates
 
 fun main() {
     // ex1
@@ -139,7 +140,7 @@ interface Element {
     var active: Boolean
 }
 
-class ActualElement: Element {
+class ActualElement : Element {
     override var active: Boolean = false
 }
 
@@ -160,4 +161,47 @@ fun plusList() {
 
     println(list1)
     println(list2)
+}
+
+fun mutableList() {
+    var names by Delegates.observable(listOf<String>()) { _, old, new ->
+        println("Names changed from $old to $new")
+    }
+
+    names += "Fabio"
+    names += "Bill"
+}
+
+var announcements = listOf<String>()
+    private set
+
+data class User(val names: String)
+
+class UserRepository {
+    private val storedUsers: MutableMap<Int, String> = mutableMapOf()
+
+    fun loadAll(): MutableMap<Int, String> {
+        return storedUsers
+    }
+}
+
+fun warningExposeProperty() {
+    val userRepository = UserRepository()
+
+    val storedUsers = userRepository.loadAll()
+    storedUsers[4] = "Kirill"
+
+    println(userRepository.loadAll())
+}
+
+data class MutableUser(var names: String)
+class UserHolder {
+    private val user: MutableUser
+        get() {
+            return user.copy()
+        }
+
+    fun get(): MutableUser {
+        return user.copy()
+    }
 }
